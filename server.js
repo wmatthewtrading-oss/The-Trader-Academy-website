@@ -49,16 +49,6 @@ app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// TEMPORARY debug logging — remove once the login loop is fixed.
-// Shows, for every request: whether the browser sent a cookie at all,
-// and whether the server recognizes a logged-in session from it.
-app.use((req, res, next) => {
-    console.log(
-          `[debug] ${req.method} ${req.path} | cookie header present: ${!!req.headers.cookie} | session user: ${req.session && req.session.user ? req.session.user.username : 'none'}`
-        );
-    next();
-});
-
 // ---------- helpers ----------
 
 function renderWithUser(filePath, user, res) {
