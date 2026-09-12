@@ -28,6 +28,12 @@ if (missing.length) {
 
 const app = express();
 
+// Render (and most hosts) terminate HTTPS at a proxy and forward plain HTTP
+// to this app. Without this, Express doesn't know the request was actually
+// secure, and cookies marked `secure: true` below can fail to be set —
+// which shows up as "login doesn't stick" / getting bounced back out.
+app.set('trust proxy', 1);
+
 app.use(session({
   secret: SESSION_SECRET || 'dev-only-secret-change-me',
   resave: false,
@@ -42,6 +48,16 @@ app.use(session({
 app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// TEMPORARY debug logging — remove once the login loop is fixed.
+// Shows, for every request: whether the browser sent a cookie at all,
+// and whether the server recognizes a logged-in session from it.
+app.use((req, res, next) => {
+    console.log(
+          `[debug] ${req.method} ${req.path} | cookie header present: ${!!req.headers.cookie} | session user: ${req.session && req.session.user ? req.session.user.username : 'none'}`
+        );
+    next();
+});
 
 // ---------- helpers ----------
 
